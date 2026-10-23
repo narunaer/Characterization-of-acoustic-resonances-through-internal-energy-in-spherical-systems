@@ -1,0 +1,67 @@
+Gerador da esfera fluida simples, versao 3 (metodologia do gerador core-shell fluido, versao 8). Arquivos:
+
+checkpoint_*.npz          tudo o que foi calculado, curva a curva (dict 'curves', chave = indice da curva na grade);
+                          tambem traz as chaves do formato antigo (picos_por_curva, done_flat, m_grid, rho_grid)
+parametros_*.json         constantes e opcoes de linha de comando usadas nesta rodada
+resumo_*.csv              uma linha por curva (substitui o antigo *_summary.csv; as colunas antigas continuam)
+ressonancias_*.csv        uma linha por ressonancia da contagem final (substitui o antigo *_peaks.csv; colunas antigas continuam)
+ressonancias_malha_*.csv  uma linha por pico achado na malha (base nas curvas normais, refinada nas de risco)
+candidatos_*.csv          uma linha por polo (zero de D_l) achado na busca
+
+Grade: m = c_M/c_S e rho_ratio = rho_S/rho_M, os mesmos valores do codigo antigo (63 x 73 = 4599 curvas).
+'global' = indice da curva + 1, como antes. Nao ha mais regimes velocity/density: a grade (m, rho_ratio) ja e' o espaco
+de parametros inteiro.
+
+Fisica: b_l = i (rho_M/rho_S)/(x^2 D_l), D_l = j_l(m x) h_l'(x) - (m/rho_ratio) j_l'(m x) h_l(x);
+W_T = soma (2l+1) |b_l|^2 [2 F_l + B_l], com F_l = (1/2) x_S^3 (j_l^2 - j_l-1 j_l+1) e B_l = x_S^2 j_l j_l' em x_S = m x.
+Uma regiao so: nao ha normalizacao por regiao (W_T = W~_S, como no codigo antigo).
+CORRECAO: o codigo antigo usava j_-1(x) = +y_0(x); o correto e' j_-1(x) = cos(x)/x = -y_0(x). Isso mudava F_0, ou seja a
+energia do termo l = 0 (altura e fundo dos picos de monopolo). Aqui o sinal e' o correto.
+Espacamento medio entre ressonancias de um mesmo l (tese): Delta_W = pi/Phi, Phi = c_M/c_S = m; no codigo e' 'esp'.
+
+Como cada curva e' contada
+  m <= 1 (normal): maximos de W_T na malha base (5000 pontos) com proeminencia >= 0,1 em log10. A busca de polos tambem
+    roda e so preenche os metadados (primary_l, D0_confirmado, candidatos, N_polos_visiveis, N_previsto_malha,
+    N_res_polos_area), sem mudar a contagem.
+  m > 1 (risco):
+    1. zeros de z^2 D_l para l = 0..10 (Newton + principio do argumento; busca completa se nao fechar); polos com
+       gamma/x < 1e-10 tem gamma refeito pelo eixo real (D_l = D_j + i D_y);
+    2. malha refinada: cada grupo de picos ganha passo dx_nec = 2 sqrt(S/(k fundo) - gamma^2), k = 10^0,1 - 1, ou metade
+       da separacao de Laurent se for menor; teto de 2000000 pontos (acima disso sobe um piso de passo);
+    3. se a busca fechou em todos os l: ressonancias = polos com Q >= 2.0 e area >= 0.001 da energia da janela pi/Phi.
+       Senao: picos da malha refinada.
+
+resumo
+  global, m, rho_ratio    curva (como antes)
+  N_peaks                 contagem final (a que vai pro mapa; mesmo significado de antes, agora pelo metodo novo)
+  x_first, Q_max          posicao da primeira ressonancia e maior Q da contagem final (como antes)
+  modo_contagem           malha_base | malha_refinada | malha_limite | polos_area
+  curva_risco             m > 1
+  N_res_malha_base        maximos de W_T na malha base
+  N_res_malha_refinada    maximos de W_T na malha refinada (passo dx_nec; so curvas de risco)
+  N_res_polos_area        polos contados (um por modo); N_res_polos_picos: idem juntando polos sobrepostos
+  N_polos_visiveis        polos com Q >= 2 e proeminencia analitica >= 0,1 (o que uma malha infinitamente fina veria)
+  N_previsto_malha        quantos desses o passo usado deveria ver (passo <= dx_nec; nas curvas normais, passo local da malha base)
+  frac_malha_refinada     N_res_malha_refinada / N_polos_visiveis
+  dx_necessario, dx_90    passo para ver todos / 90% dos polos visiveis
+  dx_piso_malha           piso de passo usado na malha refinada (> 1e-9 quando nao coube)
+  N_Dzeros_total          polos achados; N_polos_estreitos: polos com gamma/x < 1e-10
+  N_polos_borda_x_min     polos com x_k - 2 gamma < x_min (meio pico fica abaixo de x_min: a malha nao enxerga, o polo sim)
+  busca_polos, audit_all_ok  se a busca de polos fechou em todos os l
+  imag_min_busca          fundo do retangulo da busca; runtime_s, status, error
+
+ressonancias e ressonancias_malha
+  peak_number, xM_peak, FWHM, Q, WT_peak  como antes. Origem 'polo': FWHM = 2 gamma, Q = x/(2 gamma), WT_peak = S/gamma^2 + fundo
+  origem                  malha_base | malha_refinada | malha_limite | polo (antes: malha_global, zoom_D0, derivada_periodo)
+  D0_confirmado, xM_D0    pico associado a um polo de l = 0 / Re desse polo (antes: minimo de |D_0|^2 confirmado)
+  modo_deteccao           agora traz o modo de contagem da curva (os modos velocity/density nao existem mais)
+  WT_background, energy_ratio, energy_log10_prominence   fundo, razao pico/fundo e log10 dela
+  area_energy             pi S/gamma (so origem 'polo'); frac_area_local: area / energia integrada na janela pi/Phi
+  primary_l, primary_pole_real, primary_pole_imag, primary_Gamma_pole, primary_Q_pole, associated_l, N_associated_Dzeros
+
+candidatos
+  l, pole_real, pole_imag (z = x - i gamma), Gamma_pole = 2 gamma, Q_pole = x/(2 gamma)
+  argument_count_l, argument_audit_ok, busca (rapida | completa)
+  S_pole                  peso: W_l(x) ~ S/((x - x_k)^2 + gamma^2) perto do polo
+  area_pole, WT_peak_pole, WT_background_pole, frac_area_local, prom_log10_pole
+  contado_area, sobreposto, dx_nec, dx_malha_usado, borda_x_min

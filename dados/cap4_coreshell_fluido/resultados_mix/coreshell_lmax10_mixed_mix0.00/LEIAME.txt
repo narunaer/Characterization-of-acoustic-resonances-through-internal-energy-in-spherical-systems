@@ -1,0 +1,54 @@
+Gerador core-shell fluido, versao 8. Arquivos desta pasta:
+
+checkpoint_*.npz        tudo o que foi calculado, curva a curva (dict 'curves'); os CSVs saem dele
+parametros_*.json       constantes e opcoes de linha de comando usadas nesta rodada
+resumo_*.csv            uma linha por curva
+ressonancias_*.csv      uma linha por ressonancia da contagem final (N_res_energy)
+ressonancias_malha_*.csv uma linha por pico achado na malha (base nas curvas normais, refinada nas de risco)
+candidatos_*.csv        uma linha por polo (zero de D_l) achado na busca
+
+Energia total: W_T = alpha W~_A + beta W~_B (W~_A normalizada por Z_A, W~_B por Z_B; a soma fica normalizada por Z_M).
+Com --normalizacao separada volta a soma W~_A + W~_B das versoes antigas (ver parametros_*.json).
+Espacamento medio entre ressonancias (tese): Delta_W = pi / (c_M/c_A + delta c_M/c_B); no codigo e' 'esp'. E' a largura da
+janela da fracao de area e a escala dos grupos de picos na malha refinada.
+
+Como cada curva e' contada
+  alpha >= 1 e beta >= 1: maximos de W_T na malha base (5000 pontos) com proeminencia >= 0,1 em log10.
+  alpha < 1 ou beta < 1 (curva de risco):
+    1. busca dos zeros de z^4 D_l para l = 0..10 (Newton + principio do argumento; busca completa se nao fechar);
+       polos com gamma/x < 1e-10 tem gamma refeito pelo eixo real (D_l = D_j + i D_y);
+    2. malha refinada: cada grupo de picos ganha passo dx_nec = 2 sqrt(S/(k fundo) - gamma^2), k = 10^0,1 - 1
+       (maior passo que garante ver o pico com o ponto mais proximo a dx/2 do topo), ou metade da separacao de
+       Laurent se for menor; teto de 2000000 pontos (acima disso sobe um piso de passo);
+    3. se a busca fechou em todos os l: ressonancias = polos com Q >= 2.0 e area >= 0.001 da energia da janela
+       pi/Phi. Senao: picos da malha refinada.
+
+resumo
+  N_res_energy            contagem final (a que vai pro mapa)
+  modo_contagem           malha_base | malha_refinada | malha_limite | polos_area
+  N_res_malha_base        maximos de W_T na malha base
+  N_res_malha_refinada    maximos de W_T na malha refinada (passo dx_nec)
+  N_res_polos_area        polos contados (um por modo)
+  N_res_polos_picos       idem, juntando polos sobrepostos (|x1 - x2| < gamma1 + gamma2)
+  N_polos_visiveis        polos com Q >= 2 e proeminencia analitica >= 0,1 (o que uma malha infinitamente fina veria)
+  N_previsto_malha        quantos desses o passo usado deveria ver (dx_malha_usado <= dx_nec)
+  frac_malha_refinada     N_res_malha_refinada / N_polos_visiveis
+  dx_necessario, dx_90    passo para ver todos / 90% dos polos visiveis
+  dx_piso_malha           piso de passo usado na malha refinada (> 1e-9 quando nao coube)
+  N_Dzeros_total          polos achados; N_polos_estreitos: polos com gamma/x < 1e-15
+  busca_polos, audit_all_ok  se a busca de polos fechou
+  demais colunas como nas versoes anteriores (Q_energy_max, energy_ratio_max, x_primeira_res_energy, ...)
+
+ressonancias e ressonancias_malha
+  xM_peak, WT_peak, WT_background, energy_ratio, energy_log10_prominence
+  FWHM_energy, Q_energy   medidos na malha; nas ressonancias de origem 'polo': FWHM = 2 gamma, Q = x/(2 gamma)
+  area_energy             pi S/gamma (so origem 'polo'); frac_area_local: area / energia integrada na janela pi/Phi
+  origem                  malha_base | malha_refinada | malha_limite | polo
+  primary_l, primary_pole_real, primary_pole_imag, primary_Gamma_pole, primary_Q_pole, associated_l, N_associated_Dzeros
+
+candidatos
+  l, pole_real, pole_imag (z = x - i gamma), Gamma_pole = 2 gamma, Q_pole = x/(2 gamma)
+  argument_count_l, argument_audit_ok, busca (rapida | completa)
+  S_pole                  peso: W_l(x) ~ S/((x - x_k)^2 + gamma^2) perto do polo
+  area_pole, WT_peak_pole, WT_background_pole, frac_area_local, prom_log10_pole
+  contado_area, sobreposto, dx_nec, dx_malha_usado

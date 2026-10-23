@@ -1,0 +1,90 @@
+Gerador da esfera solida (elastico), versao 2, metodologia do gerador core-shell v8.
+
+Arquivos desta pasta
+  checkpoint_*.npz          tudo o que foi calculado, curva a curva (dict 'curves'); os CSVs saem dele
+  parametros_*.json         constantes, faixas do sorteio e opcoes de linha de comando desta rodada
+  resumo_*.csv              uma linha por curva
+  ressonancias_*.csv        uma linha por ressonancia da contagem final (N_res)
+  ressonancias_malha_*.csv  uma linha por pico achado na malha (base nas curvas normais, refinada nas de risco),
+                            mesmo quando a contagem final vem dos polos
+  candidatos_*.csv          uma linha por polo (zero de D_l) achado na busca
+  hipercubo_elastico.csv/.npz  formato antigo (hipercubo_voigt.csv / hipercubo_maxwell.csv): uma linha por pico da
+                            contagem final, e uma linha com campos de pico em NaN para curva sem ressonancia
+
+Fisica (secao 'Esfera Viscoelastica' da tese)
+  Elastico: c_L, c_T reais e constantes (dataset8; cL, cT = cL0, cT0), tau_adim = 0, tanL_ref = tanT_ref = 0.
+  So o cisalhamento dissipa (K real). tau = tau_adim = tau_T c_M/a.
+  Voigt:   tan d_T = tau x, tan d_L = 4/(3 eta0^2) tan d_T, c_j = c_j0 sqrt(1 - i tan d_j).
+  Maxwell: tan d_T = 1/(tau x), c_T = c_Tinf/sqrt(1 + i tan d_T), c_L = c_Linf sqrt(1 - 4/(3 eta^2) [1 - 1/(1 + i tan d_T)]).
+  cL0, cT0, eta das tabelas sao as velocidades de referencia de cada modelo (c_j0 no Voigt, c_jinf no Maxwell).
+  Coeficientes, denominador e energia: os mesmos do voigt.py/maxwell.py; D_l foi escrito sem divisoes
+  (a_l = i rho_M c_M^2 x den_R/D_l, b_l = i rho_M c_M^2 x num_R/D_l) e as Bessel internas entram escaladas por
+  e^{-|Im z|}, o que elimina os estouros do codigo antigo sem mudar nenhum resultado.
+  Energia: W_T = (Z_S/Z_M) W~_S, Z_S = rho_S |c_L(x)| (normalizacao 'ZM'; 'separada' = W~_S das versoes antigas).
+  Delta_W(x) = pi/Phi(x), Phi = max(d Re z_L/dx, d Re z_T/dx) entre as ondas que propagam (Q da onda >= 1,5):
+  espacamento local entre modos de um mesmo l ('esp'); sem perda, pi c_T/c_M (Eq. deltaW_elastica da tese).
+
+Como cada curva e' contada
+  Curva normal (versao 2): a condicao de recorrencia da tese, kappa_l E_l + (rho_M/rho_S) z_L^2 G_l = 0 com
+    kappa_l = -x h'/h e as grandezas complexas, nao tem zero com Q >= 1 em x <= 1,1 (zeros por Newton complexo a
+    partir dos minimos de |f/f'| no eixo real; sao os polos de a_l).
+    Resposta = maximos de W_T na malha base (5000 pontos) com proeminencia >= 0,1 em log10.
+    (Versao 1: nenhuma onda que propaga mais lenta que o meio; fica na coluna risco_fase_v1.)
+  Curva de risco:
+    1. zeros de z^p D_l, l = 0..10, na regiao x em [1e-4, 1], -x/3 <= y <= 1e-3 (Q >= 1,5; os polos que contam tem
+       Q >= 2) por Newton (sementes: minimos de |D_l| e zeros previstos) + principio do argumento (com a rotacao de
+       fase das ondas muito amortecidas desfeita, ver D_contorno), com busca completa por subdivisao/Beyn se nao
+       fechar; D_0 sem o fator espurio T_0;
+       gamma/x < 1e-10: gamma refeito pelo eixo real;
+       se a estimativa de zeros passar de 5000, a busca e' pulada (busca_polos = pulada_densidade);
+    2. malha refinada com passo dx_nec = 2 sqrt(S/(k base) - gamma^2), k = 10^0,1 - 1 (base = nivel sob o pico no
+       modelo analitico, que para pico isolado e' o fundo da janela), por grupo de picos
+       (ou metade da separacao de Laurent); teto de 2000000 pontos (acima disso sobe um piso de passo);
+    2b. l sem polos confiaveis (busca pulada ou auditoria falhou): pontos extras em x_k + gamma_k {0, +-1/2, ..., +-8}
+       em volta de cada zero previsto pela recorrencia (pontos_recorrencia);
+    3. se a busca fechou em todos os l: ressonancias = polos com Q >= 2.0 que sao visiveis no modelo analitico
+       (proeminencia >= 0,1) ou tem area >= 0.0003 da energia da janela Delta_W. Senao: picos da malha refinada.
+
+resumo
+  colunas antigas: _indice, alpha, beta, eta, alpha_vezes_beta, cL0, cT0, rhoS, tanL_ref, tanT_ref, xM_ref, cM, rhoM,
+                   status, runtime_s, erro, N_res (contagem final; NaN se a curva nao terminou)
+  modelo, tau_adim        modelo e tempo de relaxacao adimensional da tese (log-uniforme em [1e-4, 1e3] nos dois)
+  curva_risco, modo_contagem   malha_base | malha_refinada | malha_limite | polos_area
+  risco_recorrencia       criterio da versao 2 (decide a curva_risco, salvo --forcar-polos)
+  risco_fase_v1           criterio da versao 1, so para comparacao
+  N_previsto_recorrencia  zeros da condicao de recorrencia com Q >= 1 em x <= 1,1, somando os l (se
+                          previsao_aproximada: 11 x fase acumulada/pi, solido lento demais para listar os zeros)
+  N_previsto_ate_xmax     idem em x <= 1
+  pontos_recorrencia      pontos extras da malha em volta dos zeros previstos (l sem polos confiaveis)
+  N_res_malha_base        maximos de W_T na malha base
+  N_res_malha_refinada    maximos de W_T na malha refinada
+  N_res_polos_area        polos contados (um por modo)
+  N_res_polos_picos       idem, juntando polos sobrepostos (|x1 - x2| < gamma1 + gamma2)
+  N_polos_visiveis        polos com Q >= 2 e proeminencia analitica >= 0,1 (maximos do modelo fundo + soma das
+                          lorentzianas de todos os polos: o que uma malha infinitamente fina veria)
+  N_previsto_malha        quantos desses o passo usado deveria ver (dx_malha_usado <= dx_nec)
+  frac_malha_refinada     N_res_malha_refinada / N_polos_visiveis
+  dx_necessario, dx_90    passo para ver todos / 90% dos polos visiveis
+  dx_piso_malha           piso de passo da malha refinada (> 1e-9 quando nao coube)
+  N_polos_estreitos       polos com gamma/x < 1e-10 (gamma refeito pelo eixo real)
+  N_zeros_estimado        estimativa de zeros usada para decidir se a busca roda
+  imag_min_busca          fundo da regiao de busca em x = 1 (-1/3, ou mais raso se precisou subir)
+  busca_polos, audit_all_ok    se a busca de polos fechou (nao_feita | completa | incompleta | pulada_densidade)
+  l_max_efetivo           maior l com contribuicao > 1e-3 da maior (mesmo criterio antigo)
+  runtime_s               tempo da curva
+
+ressonancias e ressonancias_malha
+  colunas antigas: xM_pico (posicao), altura (W_T no pico), largura (FWHM), Q (= x/FWHM), l, l_max_efetivo,
+                   delta_x (distancia ao pico seguinte), origem (polo | malha_base | malha_refinada | malha_limite)
+  fundo, razao_pico_fundo, proeminencia_log10
+  area (pi S/gamma, so origem polo), frac_area_local (area / energia integrada na janela Delta_W)
+  polo_real, polo_imag, Gamma_polo, Q_polo, l_associados, N_polos_associados: polo associado (o mais proximo)
+  + metadados da curva
+
+candidatos
+  l, polo_real, polo_imag (z = x - i gamma), Gamma_polo = 2 gamma, Q_polo = x/(2 gamma)
+  contagem_argumento_l, auditoria_ok, busca (rapida | completa)
+  S_polo (W_l ~ S/((x - x_k)^2 + gamma^2)), area_polo, altura_polo, fundo_polo, frac_area_local
+  prom_log10_polo, base_pico   proeminencia do polo no modelo analitico (0 se nao vira maximo) e nivel sob o pico
+  delta_escala            max(|Im z_j(x_k)| - |Im z_j(z_k)|); acima de 1 a lorentziana do residuo nao vale e S = NaN
+  contado_area (entrou na contagem final), sobreposto, dx_nec, dx_malha_usado, pico_na_malha, xM_pico_malha

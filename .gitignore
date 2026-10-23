@@ -1,0 +1,25 @@
+# arquivos temporarios
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+
+# pasta de saida dos notebooks (figuras e tabelas sao regeneradas)
+cap*/resultados/
+apendice_*/resultados/
+validacao/resultados/
+
+# bancos de dados: ficam fora do git (ver dados/README.md); so a documentacao entra
+dados/**/*
+!dados/**/
+!dados/README.md
+!dados/MANIFESTO.md
+!dados/**/LEIAME.txt
+!dados/**/parametros_*.json
+
+# arquivos auxiliares que os codigos podem criar
+fem_auto.json
+*.log

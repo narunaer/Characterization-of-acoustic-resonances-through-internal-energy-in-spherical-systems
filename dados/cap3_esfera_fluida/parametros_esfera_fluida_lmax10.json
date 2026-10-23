@@ -1,0 +1,82 @@
+{
+ "versao": 3,
+ "argumentos": {
+  "workers": 20,
+  "saida": "resultados_esfera",
+  "prazo_polos": 120.0,
+  "limite_curva": 600.0,
+  "salvar_a_cada": 25,
+  "frac_area": 0.001,
+  "sem_polos_normais": false,
+  "max_curvas": null,
+  "indices": null,
+  "refazer_falhas": false
+ },
+ "constantes": {
+  "LMAX": 10,
+  "X_MIN": 0.0001,
+  "X_MAX": 1.0,
+  "IMAG_MIN": -0.5,
+  "IMAG_MAX": 0.001,
+  "RHO_EXTRA": [
+   0.0001,
+   0.00018888888888888888,
+   0.0002777777777777778,
+   0.0003666666666666666,
+   0.0004555555555555555,
+   0.0005444444444444444,
+   0.0006333333333333333,
+   0.0007222222222222222,
+   0.0008111111111111111,
+   0.0009
+  ],
+  "P_POLO": 2,
+  "N_LOG": 1000,
+  "N_MEIO": 3000,
+  "N_FIM": 1000,
+  "PROM_WT": 0.1,
+  "PROM_WL": 0.75,
+  "Q_MIN": 2.0,
+  "FRAC_AREA": 0.001,
+  "Q_MIN_POLO": 2.0,
+  "DX_MIN": 1e-09,
+  "N_MAX_PONTOS": 2000000,
+  "NIVEIS_CONTORNO": [
+   64,
+   128,
+   256
+  ],
+  "NIVEIS_AUDITORIA": [
+   256,
+   512,
+   1024,
+   2048,
+   4096,
+   8192,
+   16384,
+   32768
+  ],
+  "TOL_INTEIRO": 0.05,
+  "PROF_MAX": 40,
+  "BEYN_MAX": 8,
+  "BEYN_FOLGA": 4,
+  "BEYN_N": 500,
+  "RESIDUO_MAX": 1e-07,
+  "GAMMA_RAD": 1e-10,
+  "TOL_DUPLICATA": 1e-08,
+  "VERSAO": 3,
+  "K_VIS": 0.2589254117941673,
+  "NOME": "esfera_fluida_lmax10",
+  "CAMPOS_ANTIGOS": [
+   "xM_peak",
+   "FWHM",
+   "Q",
+   "WT_peak",
+   "origem",
+   "D0_confirmado",
+   "xM_D0"
+  ]
+ },
+ "curvas_ok": 4599,
+ "curvas_total": 4599
+}

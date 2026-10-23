@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Se este material for útil, cite a tese."
+title: "Caracterização de ressonâncias acústicas por meio da energia interna em sistemas esféricos"
+type: thesis
+authors:
+  - family-names: Rodrigues
+    given-names: Naruna Esselin
+year: 2026
+institution:
+  name: "Instituto de Física de São Carlos, Universidade de São Paulo"

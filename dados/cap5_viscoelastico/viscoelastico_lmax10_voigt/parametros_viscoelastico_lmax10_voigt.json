@@ -1,0 +1,151 @@
+{
+ "versao": 2,
+ "modelo": "voigt",
+ "seed": 42,
+ "argumentos": {
+  "modelo": [
+   "elastico",
+   "voigt",
+   "maxwell"
+  ],
+  "n_curvas": 8000,
+  "workers": 20,
+  "saida": "/home/naruna/esfera/viscoelastico/resultados",
+  "seed": 42,
+  "tau": null,
+  "prazo_polos": 120.0,
+  "limite_curva": 600.0,
+  "salvar_a_cada": 25,
+  "normalizacao": "ZM",
+  "recorrencia": "complexa",
+  "frac_area": 0.0003,
+  "n_zeros_max": 5000,
+  "forcar_polos": false,
+  "max_curvas": null,
+  "refazer_falhas": false,
+  "recontar": false
+ },
+ "constantes": {
+  "VERSAO": 2,
+  "LMAX": 10,
+  "X_MIN": 0.0001,
+  "X_MAX": 1.0,
+  "IMAG_MAX": 0.001,
+  "CM_PADRAO": 1500.0,
+  "RHOM_PADRAO": 1000.0,
+  "LIMITE_FISICO": 0.8660254037844386,
+  "XM_REF": 0.5,
+  "CT_MIN": 0.001,
+  "FAIXAS": {
+   "elastico": {
+    "alpha": [
+     0.001,
+     1000.0
+    ],
+    "beta": [
+     0.0003333333333333333,
+     1000.0
+    ]
+   },
+   "voigt": {
+    "alpha": [
+     0.001,
+     1000.0
+    ],
+    "beta": [
+     0.0003333333333333333,
+     1000.0
+    ],
+    "tau": [
+     0.0001,
+     1000.0
+    ]
+   },
+   "maxwell": {
+    "alpha": [
+     0.001,
+     10000.0
+    ],
+    "beta": [
+     0.0003333333333333333,
+     1000.0
+    ],
+    "tau": [
+     0.0001,
+     1000.0
+    ]
+   }
+  },
+  "N_LOG": 1000,
+  "N_MEIO": 3000,
+  "N_FIM": 1000,
+  "PROM_WT": 0.1,
+  "PROM_WL": 0.75,
+  "Q_MIN": 2.0,
+  "FRAC_AREA": 0.0003,
+  "Q_MIN_POLO": 2.0,
+  "DX_MIN": 1e-09,
+  "N_MAX_PONTOS": 2000000,
+  "BLOCO": 100000,
+  "NIVEIS_CONTORNO": [
+   64,
+   128,
+   256,
+   512,
+   1024,
+   2048
+  ],
+  "ANG_MAX": 1.0,
+  "NIVEIS_AUDITORIA": [
+   256,
+   512,
+   1024,
+   2048,
+   4096,
+   8192,
+   16384,
+   32768
+  ],
+  "TOL_INTEIRO": 0.05,
+  "PROF_MAX": 40,
+  "BEYN_MAX": 8,
+  "BEYN_FOLGA": 4,
+  "BEYN_N": 500,
+  "RESIDUO_MAX": 1e-07,
+  "GAMMA_RAD": 1e-10,
+  "DELTA_ESCALA_MAX": 1.0,
+  "TOL_DUPLICATA": 1e-08,
+  "Q_BORDA": 1.5,
+  "Q_BORDA_EXTRA": [
+   1.75,
+   1.9
+  ],
+  "N_ZEROS_MAX": 5000,
+  "N_RAPIDA_MIN": 200000,
+  "N_RAPIDA_MAX": 2000000,
+  "PASSOS_POR_ESP": 200,
+  "PROM_SEMENTE": 0.001,
+  "TOL_TAYLOR": 1e-07,
+  "TOL_G_REAL": 1e-06,
+  "NORMALIZACAO": "ZM",
+  "X_PREV_MAX": 1.1,
+  "Q_PREV_MIN": 1.0,
+  "PREV_PASSOS_POR_PI": 16,
+  "PREV_MAX_RAIZES": 3000,
+  "RECORRENCIA": "complexa",
+  "ZETA_QS": 1.5707963267948966,
+  "TOL_CANCELAMENTO": 1e-12,
+  "VAZIO_POLO": {
+   "l": null,
+   "polo_real": NaN,
+   "polo_imag": NaN,
+   "Gamma_polo": NaN,
+   "Q_polo": NaN,
+   "l_associados": "",
+   "N_polos_associados": 0
+  },
+  "K_VIS": 0.2589254117941673
+ },
+ "curvas_ok": 8000,
+ "curvas_total": 8000
+}
